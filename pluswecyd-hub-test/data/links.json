@@ -1,0 +1,27 @@
+{
+  "tabs": [
+    {
+      "id": "creative",
+      "label": "크리에이티브",
+      "links": [
+        { "title": "랜딩 용량검수 시스템", "url": "https://example.com", "icon": "ti-gauge" },
+        { "title": "DA 자동제작 시스템", "url": "https://example.com", "icon": "ti-layout" },
+        { "title": "웹표준화 가이드", "url": "https://example.com", "icon": "ti-book" }
+      ]
+    },
+    {
+      "id": "planning",
+      "label": "기획",
+      "links": [
+        { "title": "링크 추가 예정", "url": "#", "icon": "ti-link" }
+      ]
+    },
+    {
+      "id": "common",
+      "label": "공통",
+      "links": [
+        { "title": "링크 추가 예정", "url": "#", "icon": "ti-link" }
+      ]
+    }
+  ]
+}

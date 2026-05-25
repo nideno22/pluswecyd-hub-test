@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>플러스위시드 허브 시스템 (TEST)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a1628; color: #fff; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+/* 뉴스 티커 */
+.ticker-bar { background: #0d1f3c; border-bottom: 1px solid #1e3a5f; height: 36px; display: flex; align-items: center; overflow: hidden; position: relative; cursor: pointer; flex-shrink: 0; }
+.ticker-label { background: #e94560; color: white; font-size: 11px; font-weight: 700; padding: 0 12px; height: 100%; display: flex; align-items: center; white-space: nowrap; flex-shrink: 0; letter-spacing: 0.5px; }
+.ticker-track { display: flex; align-items: center; overflow: hidden; flex: 1; }
+.ticker-inner { display: flex; gap: 60px; white-space: nowrap; animation: ticker 40s linear infinite; }
+.ticker-inner span { font-size: 12px; color: #a0b4cc; }
+.ticker-inner span:hover { color: #fff; }
+@keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+/* 뉴스 드롭다운 */
+.news-dropdown { display: none; position: absolute; top: 36px; left: 0; right: 0; background: #0d1f3c; border-bottom: 1px solid #1e3a5f; z-index: 100; padding: 8px 0; }
+.news-dropdown.open { display: block; }
+.news-item { padding: 10px 20px; font-size: 13px; color: #a0b4cc; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+.news-item:hover { background: #1e3a5f; color: #fff; }
+.news-item i { color: #e94560; font-size: 14px; flex-shrink: 0; }
+
+/* 메인 레이아웃 */
+.main-layout { display: flex; flex: 1; overflow: hidden; }
+
+/* 사이드바 */
+.sidebar { width: 220px; background: #0d1f3c; border-right: 1px solid #1e3a5f; display: flex; flex-direction: column; flex-shrink: 0; }
+.sidebar-logo { padding: 16px; border-bottom: 1px solid #1e3a5f; }
+.sidebar-logo .logo-text { font-size: 13px; font-weight: 700; color: #e94560; letter-spacing: 0.5px; }
+.sidebar-logo .logo-sub { font-size: 10px; color: #4a6080; margin-top: 2px; }
+
+/* 탭 */
+.tab-buttons { display: flex; border-bottom: 1px solid #1e3a5f; }
+.tab-btn { flex: 1; padding: 10px 4px; font-size: 10px; color: #4a6080; background: none; border: none; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.tab-btn.active { color: #e94560; border-bottom-color: #e94560; }
+.tab-btn:hover { color: #a0b4cc; }
+
+/* 링크 목록 */
+.tab-content { display: none; flex-direction: column; gap: 2px; padding: 8px; flex: 1; overflow-y: auto; }
+.tab-content.active { display: flex; }
+.link-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; cursor: pointer; text-decoration: none; color: #a0b4cc; font-size: 13px; transition: all 0.2s; }
+.link-item:hover { background: #1e3a5f; color: #fff; }
+.link-item i { font-size: 16px; color: #4a6080; flex-shrink: 0; }
+.link-item:hover i { color: #e94560; }
+
+/* 날씨 */
+.weather-widget { padding: 12px 16px; border-top: 1px solid #1e3a5f; }
+.weather-content { display: flex; align-items: center; gap: 10px; }
+.weather-icon { font-size: 24px; }
+.weather-info .temp { font-size: 20px; font-weight: 600; }
+.weather-info .desc { font-size: 11px; color: #4a6080; }
+
+/* 메인 콘텐츠 */
+.main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+
+/* AI 툴 추천 */
+.ai-tool-bar { background: #0d1f3c; border-bottom: 1px solid #1e3a5f; padding: 8px 16px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.ai-tool-label { font-size: 11px; color: #4a6080; font-weight: 600; letter-spacing: 0.5px; white-space: nowrap; }
+.ai-tool-card { display: flex; align-items: center; gap: 8px; background: #1e3a5f; border-radius: 8px; padding: 6px 12px; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+.ai-tool-card:hover { background: #2a4a6f; }
+.ai-tool-card .tool-name { font-size: 12px; color: #fff; font-weight: 500; }
+.ai-tool-card .tool-desc { font-size: 10px; color: #4a6080; }
+.refresh-btn { background: none; border: 1px solid #1e3a5f; border-radius: 6px; padding: 4px 8px; color: #4a6080; cursor: pointer; font-size: 12px; margin-left: auto; }
+.refresh-btn:hover { color: #fff; border-color: #e94560; }
+
+/* 어항 영역 */
+.aquarium-section { flex: 1; position: relative; overflow: hidden; }
+.aquarium-bg { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
+.aquarium-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0) 60%, rgba(10,22,40,0.8) 100%); }
+
+/* 물고기 */
+.fish { position: absolute; cursor: pointer; transition: transform 0.1s; user-select: none; }
+.fish img { width: 80px; height: auto; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4)); }
+.fish.flipped img { transform: scaleX(-1); }
+
+/* 말풍선 */
+.speech-bubble { position: absolute; background: white; color: #1a1a2e; font-size: 12px; font-weight: 500; padding: 8px 12px; border-radius: 12px; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.3); pointer-events: none; opacity: 0; transition: opacity 0.5s; z-index: 10; }
+.speech-bubble::after { content: ''; position: absolute; bottom: -8px; left: 16px; border: 8px solid transparent; border-top-color: white; border-bottom: 0; }
+.speech-bubble.show { opacity: 1; }
+
+/* 밥주기 애니메이션 */
+.food-particle { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: #f5c842; pointer-events: none; animation: fallDown 1s ease-in forwards; z-index: 20; }
+@keyframes fallDown { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(60px); } }
+
+/* 물고기 선택 패널 */
+.fish-selector { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; background: rgba(10,22,40,0.85); border: 1px solid #1e3a5f; border-radius: 12px; padding: 8px 12px; z-index: 10; }
+.fish-option { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding: 4px 8px; border-radius: 8px; transition: background 0.2s; }
+.fish-option:hover { background: #1e3a5f; }
+.fish-option.active { background: #e94560; }
+.fish-option img { width: 32px; height: 32px; object-fit: contain; }
+.fish-option span { font-size: 9px; color: #a0b4cc; }
+
+/* 대화창 */
+.chat-section { height: 220px; background: #0d1f3c; border-top: 1px solid #1e3a5f; display: flex; flex-direction: column; flex-shrink: 0; }
+.chat-header { padding: 8px 16px; border-bottom: 1px solid #1e3a5f; display: flex; align-items: center; gap: 8px; }
+.chat-header i { color: #e94560; font-size: 16px; }
+.chat-header span { font-size: 12px; font-weight: 600; color: #a0b4cc; }
+.chat-messages { flex: 1; overflow-y: auto; padding: 8px 16px; display: flex; flex-direction: column; gap: 6px; }
+.chat-msg { max-width: 80%; padding: 8px 12px; border-radius: 10px; font-size: 13px; line-height: 1.5; }
+.chat-msg.user { background: #e94560; color: white; align-self: flex-end; border-radius: 10px 10px 2px 10px; }
+.chat-msg.ai { background: #1e3a5f; color: #e0eaf5; align-self: flex-start; border-radius: 10px 10px 10px 2px; }
+.chat-input-row { padding: 8px 16px; display: flex; gap: 8px; border-top: 1px solid #1e3a5f; }
+.chat-input-row input { flex: 1; background: #1e3a5f; border: 1px solid #2a4a6f; border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 13px; outline: none; }
+.chat-input-row input:focus { border-color: #e94560; }
+.chat-input-row input::placeholder { color: #4a6080; }
+.chat-send { background: #e94560; border: none; border-radius: 8px; padding: 8px 14px; color: white; cursor: pointer; font-size: 13px; }
+.chat-send:hover { background: #c73550; }
+</style>
+</head>
+<body>
+
+<h1 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">플러스위시드 허브 시스템</h1>
+
+<!-- 뉴스 티커 -->
+<div class="ticker-bar" id="tickerBar">
+  <div class="ticker-label">AI NEWS</div>
+  <div class="ticker-track">
+    <div class="ticker-inner" id="tickerInner">
+      <span>뉴스를 불러오는 중...</span>
+    </div>
+  </div>
+</div>
+<div class="news-dropdown" id="newsDropdown"></div>
+
+<!-- 메인 레이아웃 -->
+<div class="main-layout">
+
+  <!-- 사이드바 -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-text">+ WECYD HUB</div>
+      <div class="logo-sub">TEST VERSION</div>
+    </div>
+    <div class="tab-buttons">
+      <button class="tab-btn active" onclick="switchTab('creative')">크리에이티브</button>
+      <button class="tab-btn" onclick="switchTab('planning')">기획</button>
+      <button class="tab-btn" onclick="switchTab('common')">공통</button>
+    </div>
+    <div class="tab-content active" id="tab-creative"></div>
+    <div class="tab-content" id="tab-planning"></div>
+    <div class="tab-content" id="tab-common"></div>
+    <div class="weather-widget">
+      <div class="weather-content" id="weatherContent">
+        <div class="weather-icon">🌤</div>
+        <div class="weather-info">
+          <div class="temp" id="weatherTemp">--°C</div>
+          <div class="desc" id="weatherDesc">날씨 불러오는 중...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 메인 콘텐츠 -->
+  <div class="main-content">
+
+    <!-- AI 툴 추천 바 -->
+    <div class="ai-tool-bar">
+      <span class="ai-tool-label">오늘의 AI</span>
+      <a class="ai-tool-card" id="aiToolCard" href="#" target="_blank">
+        <div>
+          <div class="tool-name" id="aiToolName">불러오는 중...</div>
+          <div class="tool-desc" id="aiToolDesc"></div>
+        </div>
+      </a>
+      <button class="refresh-btn" onclick="showRandomAiTool()">↻ 다른 툴</button>
+    </div>
+
+    <!-- 어항 -->
+    <div class="aquarium-section" id="aquarium">
+      <img src="assets/bg.png" alt="" class="aquarium-bg">
+      <div class="aquarium-overlay"></div>
+
+      <!-- 말풍선 -->
+      <div class="speech-bubble" id="speechBubble"></div>
+
+      <!-- 물고기들 (JS로 생성) -->
+
+      <!-- 물고기 선택 -->
+      <div class="fish-selector" id="fishSelector"></div>
+    </div>
+
+    <!-- 대화창 -->
+    <div class="chat-section">
+      <div class="chat-header">
+        <i class="ti ti-message-circle"></i>
+        <span>AI 어시스턴트</span>
+      </div>
+      <div class="chat-messages" id="chatMessages">
+        <div class="chat-msg ai">안녕하세요! 무엇이든 물어보세요 😊</div>
+      </div>
+      <div class="chat-input-row">
+        <input type="text" id="chatInput" placeholder="메시지를 입력하세요..." />
+        <button class="chat-send" onclick="sendChat()">전송</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── 설정 ──────────────────────────────────────────────────────
+const NOTION_TOKEN = '';
+const NOTION_PAGE_ID = '';
+
+// ── 물고기 데이터 ────────────────────────────────────────────
+const FISH_TYPES = [
+  { id: 'clownfish', name: '흰동가리', src: 'assets/fish/clownfish.png' },
+  { id: 'bluetang', name: '블루탱', src: 'assets/fish/bluetang.png' },
+  { id: 'guppy', name: '구피', src: 'assets/fish/guppy.png' },
+  { id: 'cardinal', name: '카디널', src: 'assets/fish/cardinal.png' },
+  { id: 'angel', name: '엔젤피쉬', src: 'assets/fish/angel.png' },
+
+];
+
+// ── 응원 메시지 ──────────────────────────────────────────────
+const MESSAGES = [
+  '오늘도 파이팅! 💪',
+  '잘 하고 있어요 👍',
+  '점심 먹었어요? 🍱',
+  '잠깐 스트레칭 어때요? 🧘',
+  '오늘 하루도 수고해요 ✨',
+  '커피 한잔 마실 시간! ☕',
+  '좋은 아이디어가 떠오를 거예요 💡',
+  '조금만 더 힘내요! 🌟',
+];
+
+// ── AI 툴 목록 ───────────────────────────────────────────────
+const AI_TOOLS = [
+  { name: 'Midjourney', desc: 'AI 이미지 생성', url: 'https://midjourney.com' },
+  { name: 'Claude', desc: 'AI 어시스턴트', url: 'https://claude.ai' },
+  { name: 'ChatGPT', desc: 'AI 대화 모델', url: 'https://chatgpt.com' },
+  { name: 'Runway', desc: 'AI 영상 생성', url: 'https://runwayml.com' },
+  { name: 'Kling AI', desc: 'AI 영상 제작', url: 'https://klingai.com' },
+  { name: 'ElevenLabs', desc: 'AI 음성 합성', url: 'https://elevenlabs.io' },
+  { name: 'Canva AI', desc: 'AI 디자인 툴', url: 'https://canva.com' },
+  { name: 'Gamma', desc: 'AI PPT 제작', url: 'https://gamma.app' },
+  { name: 'Perplexity', desc: 'AI 검색 엔진', url: 'https://perplexity.ai' },
+  { name: 'Leonardo AI', desc: 'AI 이미지 생성', url: 'https://leonardo.ai' },
+];
+
+// ── 물고기 상태 ──────────────────────────────────────────────
+let activeFish = [];
+let selectedTypes = ['clownfish', 'bluetang', 'guppy'];
+let chatHistory = [];
+let newsArticles = [];
+
+// ── 초기화 ──────────────────────────────────────────────────
+window.onload = () => {
+  loadLinks();
+  loadNews();
+  loadWeather();
+  showRandomAiTool();
+  renderFishSelector();
+  spawnFish();
+  startMessageTimer();
+};
+
+// ── 사이드바 링크 ────────────────────────────────────────────
+async function loadLinks() {
+  try {
+    const r = await fetch('/data/links.json');
+    const data = await r.json();
+    data.tabs.forEach(tab => {
+      const el = document.getElementById('tab-' + tab.id);
+      if (!el) return;
+      tab.links.forEach(link => {
+        const a = document.createElement('a');
+        a.className = 'link-item';
+        a.href = link.url;
+        a.target = '_blank';
+        a.innerHTML = `<i class="ti ${link.icon}" aria-hidden="true"></i><span>${link.title}</span>`;
+        el.appendChild(a);
+      });
+    });
+  } catch (e) { console.error(e); }
+}
+
+function switchTab(id) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    const tabs = ['creative', 'planning', 'common'];
+    b.classList.toggle('active', tabs[i] === id);
+  });
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+}
+
+// ── 뉴스 ─────────────────────────────────────────────────────
+async function loadNews() {
+  try {
+    const r = await fetch('/api/news');
+    const data = await r.json();
+    newsArticles = data.articles || [];
+    updateTicker();
+    updateNewsDropdown();
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function updateTicker() {
+  if (!newsArticles.length) return;
+  const inner = document.getElementById('tickerInner');
+  const items = [...newsArticles, ...newsArticles].map(a => `<span>${a.title}</span>`).join('');
+  inner.innerHTML = items;
+}
+
+function updateNewsDropdown() {
+  const dd = document.getElementById('newsDropdown');
+  dd.innerHTML = newsArticles.slice(0, 5).map(a =>
+    `<div class="news-item" onclick="window.open('${a.url}','_blank')">
+      <i class="ti ti-external-link" aria-hidden="true"></i>
+      <span>${a.title}</span>
+    </div>`
+  ).join('');
+}
+
+document.getElementById('tickerBar').onclick = () => {
+  document.getElementById('newsDropdown').classList.toggle('open');
+};
+
+// ── 날씨 ─────────────────────────────────────────────────────
+async function loadWeather() {
+  try {
+    const r = await fetch('https://api.open-meteo.com/v1/forecast?latitude=37.5665&longitude=126.9780&current_weather=true&timezone=Asia/Seoul');
+    const data = await r.json();
+    const temp = Math.round(data.current_weather.temperature);
+    const code = data.current_weather.weathercode;
+    const icons = { 0: '☀️', 1: '🌤', 2: '⛅', 3: '☁️', 45: '🌫', 61: '🌧', 80: '🌦', 95: '⛈' };
+    const descs = { 0: '맑음', 1: '대체로 맑음', 2: '구름 조금', 3: '흐림', 45: '안개', 61: '비', 80: '소나기', 95: '뇌우' };
+    const icon = icons[code] || '🌤';
+    const desc = descs[code] || '서울';
+    document.getElementById('weatherTemp').textContent = `${temp}°C`;
+    document.getElementById('weatherDesc').textContent = `서울 · ${desc}`;
+    document.querySelector('.weather-icon').textContent = icon;
+  } catch (e) { console.error(e); }
+}
+
+// ── AI 툴 ─────────────────────────────────────────────────────
+function showRandomAiTool() {
+  const tool = AI_TOOLS[Math.floor(Math.random() * AI_TOOLS.length)];
+  document.getElementById('aiToolName').textContent = tool.name;
+  document.getElementById('aiToolDesc').textContent = tool.desc;
+  document.getElementById('aiToolCard').href = tool.url;
+}
+
+// ── 물고기 ────────────────────────────────────────────────────
+function renderFishSelector() {
+  const sel = document.getElementById('fishSelector');
+  sel.innerHTML = FISH_TYPES.map(f => `
+    <div class="fish-option ${selectedTypes.includes(f.id) ? 'active' : ''}" onclick="toggleFish('${f.id}')">
+      <img src="${f.src}" alt="${f.name}" onerror="this.style.display='none';this.parentNode.querySelector('span').textContent='🐟'">
+      <span>${f.name}</span>
+    </div>
+  `).join('');
+}
+
+function toggleFish(id) {
+  if (selectedTypes.includes(id)) {
+    if (selectedTypes.length <= 1) return;
+    selectedTypes = selectedTypes.filter(t => t !== id);
+  } else {
+    if (selectedTypes.length >= 3) selectedTypes.shift();
+    selectedTypes.push(id);
+  }
+  renderFishSelector();
+  spawnFish();
+}
+
+function spawnFish() {
+  activeFish.forEach(f => { if (f.el) f.el.remove(); });
+  activeFish = [];
+
+  const aquarium = document.getElementById('aquarium');
+  const W = aquarium.offsetWidth;
+  const H = aquarium.offsetHeight - 120;
+
+  selectedTypes.forEach((typeId, i) => {
+    const type = FISH_TYPES.find(f => f.id === typeId);
+    if (!type) return;
+
+    const el = document.createElement('div');
+    el.className = 'fish';
+    el.innerHTML = `<img src="${type.src}" alt="${type.name}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 80 50%22><text y=%2240%22 font-size=%2240%22>🐟</text></svg>'">`;
+    aquarium.appendChild(el);
+
+    const fish = {
+      el,
+      x: Math.random() * (W - 100) + 50,
+      y: Math.random() * (H - 100) + 50,
+      vx: (Math.random() * 1.5 + 0.5) * (Math.random() > 0.5 ? 1 : -1),
+      vy: (Math.random() * 0.5 - 0.25),
+      flipped: false,
+    };
+
+    el.onclick = () => feedFish(fish);
+    activeFish.push(fish);
+  });
+
+  animateFish();
+}
+
+function animateFish() {
+  const aquarium = document.getElementById('aquarium');
+  const W = aquarium.offsetWidth;
+  const H = aquarium.offsetHeight - 120;
+
+  activeFish.forEach(fish => {
+    if (!fish.el) return;
+    fish.x += fish.vx;
+    fish.y += fish.vy;
+
+    if (fish.x < 20 || fish.x > W - 100) {
+      fish.vx *= -1;
+      fish.flipped = fish.vx > 0;
+    }
+    if (fish.y < 20 || fish.y > H - 60) fish.vy *= -1;
+
+    fish.vy += (Math.random() - 0.5) * 0.05;
+    fish.vy = Math.max(-0.8, Math.min(0.8, fish.vy));
+
+    fish.el.style.left = fish.x + 'px';
+    fish.el.style.top = fish.y + 'px';
+    fish.el.classList.toggle('flipped', fish.flipped);
+  });
+
+  requestAnimationFrame(animateFish);
+}
+
+function feedFish(fish) {
+  const aquarium = document.getElementById('aquarium');
+  for (let i = 0; i < 5; i++) {
+    const food = document.createElement('div');
+    food.className = 'food-particle';
+    food.style.left = (fish.x + 30 + (Math.random() - 0.5) * 20) + 'px';
+    food.style.top = (fish.y - 10) + 'px';
+    aquarium.appendChild(food);
+    setTimeout(() => food.remove(), 1000);
+  }
+  fish.el.style.transform = 'scale(1.2)';
+  setTimeout(() => { if (fish.el) fish.el.style.transform = ''; }, 300);
+}
+
+// ── 말풍선 ────────────────────────────────────────────────────
+function startMessageTimer() {
+  showMessage();
+  setInterval(showMessage, 30000);
+}
+
+function showMessage() {
+  if (!activeFish.length) return;
+  const fish = activeFish[Math.floor(Math.random() * activeFish.length)];
+  const msg = MESSAGES[Math.floor(Math.random() * MESSAGES.length)];
+  const bubble = document.getElementById('speechBubble');
+  bubble.textContent = msg;
+  bubble.style.left = (fish.x + 10) + 'px';
+  bubble.style.top = (fish.y - 50) + 'px';
+  bubble.classList.add('show');
+  setTimeout(() => bubble.classList.remove('show'), 4000);
+}
+
+// ── 채팅 ─────────────────────────────────────────────────────
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const question = input.value.trim();
+  if (!question) return;
+
+  input.value = '';
+  addChatMsg(question, 'user');
+  chatHistory.push({ role: 'user', content: question });
+
+  const loadingEl = addChatMsg('생각 중...', 'ai');
+
+  try {
+    const r = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        notionToken: NOTION_TOKEN,
+        pageId: NOTION_PAGE_ID,
+        question,
+        history: chatHistory.slice(-10)
+      })
+    });
+    const data = await r.json();
+    loadingEl.textContent = data.answer || data.error || '오류가 발생했어요.';
+    if (data.answer) chatHistory.push({ role: 'assistant', content: data.answer });
+  } catch (e) {
+    loadingEl.textContent = '연결 오류가 발생했어요.';
+  }
+}
+
+function addChatMsg(text, role) {
+  const msgs = document.getElementById('chatMessages');
+  const el = document.createElement('div');
+  el.className = 'chat-msg ' + role;
+  el.textContent = text;
+  msgs.appendChild(el);
+  msgs.scrollTop = msgs.scrollHeight;
+  return el;
+}
+
+document.getElementById('chatInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') sendChat();
+});
+</script>
+</body>
+</html>

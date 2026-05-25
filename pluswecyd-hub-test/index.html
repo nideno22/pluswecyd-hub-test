@@ -260,6 +260,7 @@ const AI_TOOLS = [
 
 // ── 물고기 상태 ──────────────────────────────────────────────
 let activeFish = [];
+let animationId = null;
 let selectedTypes = ['clownfish', 'bluetang', 'guppy'];
 let chatHistory = [];
 let newsArticles = [];
@@ -416,6 +417,8 @@ function spawnFish() {
     activeFish.push(fish);
   });
 
+  if (animationId) cancelAnimationFrame(animationId);
+  animationId = null;
   animateFish();
 }
 
@@ -443,7 +446,7 @@ function animateFish() {
     fish.el.classList.toggle('flipped', fish.flipped);
   });
 
-  requestAnimationFrame(animateFish);
+  animationId = requestAnimationFrame(animateFish);
 }
 
 function feedFish(fish) {

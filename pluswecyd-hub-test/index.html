@@ -110,6 +110,21 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .chat-input-row input::placeholder { color: #4a6080; }
 .chat-send { background: #e94560; border: none; border-radius: 8px; padding: 8px 14px; color: white; cursor: pointer; font-size: 13px; }
 .chat-send:hover { background: #c73550; }
+@media (max-width: 768px) {
+  body { overflow: auto; height: auto; }
+  .main-layout { flex-direction: column; }
+  .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid #1e3a5f; }
+  .tab-content { max-height: 180px; }
+  .aquarium-section { height: 280px; }
+  .fish img { width: 50px; }
+  .fish-selector { gap: 4px; padding: 6px 8px; bottom: 8px; }
+  .fish-option { padding: 3px 5px; }
+  .fish-option img { width: 24px; height: 24px; }
+  .fish-option span { font-size: 8px; }
+  .chat-section { height: 200px; }
+  .ai-tool-bar { padding: 6px 10px; }
+  .weather-widget { padding: 8px 12px; }
+}
 </style>
 </head>
 <body>
@@ -392,7 +407,7 @@ function spawnFish() {
       el,
       x: Math.random() * (W - 100) + 50,
       y: Math.random() * (H - 100) + 50,
-      vx: (Math.random() * 0.8 + 0.3) * (Math.random() > 0.5 ? 1 : -1),
+      vx: (Math.random() * 1.5 + 0.5) * (Math.random() > 0.5 ? 1 : -1),
       vy: (Math.random() * 0.5 - 0.25),
       flipped: false,
     };
@@ -510,3 +525,19 @@ document.getElementById('chatInput').addEventListener('keydown', e => {
 </script>
 </body>
 </html>
+<!-- 이 태그는 무시하세요 - 아래 CSS를 index.html @media (max-width: 768px) {
+  body { overflow: auto; height: auto; }
+  .main-layout { flex-direction: column; }
+  .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid #1e3a5f; }
+  .tab-content { max-height: 180px; }
+  .aquarium-section { height: 280px; }
+  .fish img { width: 50px; }
+  .fish-selector { gap: 4px; padding: 6px 8px; bottom: 8px; }
+  .fish-option { padding: 3px 5px; }
+  .fish-option img { width: 24px; height: 24px; }
+  .fish-option span { font-size: 8px; }
+  .chat-section { height: 200px; }
+  .ai-tool-bar { padding: 6px 10px; }
+  .weather-widget { padding: 8px 12px; }
+}
+</style> 태그 바로 앞에 추가하세요 -->
